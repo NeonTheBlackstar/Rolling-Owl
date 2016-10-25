@@ -16,9 +16,9 @@ void Player::update(Game * pGame)
 void Player::horizontalMov(Game * pGame)
 {
 	/// Calculating horizontal movement vector: speed
-	float delta = pGame -> delta;
+	float delta = pGame->delta;
 	float acc = delta * v_acceleration.x;
-	float gameSpeed = pGame -> gameSpeed; /// Maximum speed
+	float gameSpeed = pGame->gameSpeed; /// Maximum speed
 
 	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 	{
@@ -40,7 +40,7 @@ void Player::horizontalMov(Game * pGame)
 		if (v_speed.x > delta*gameSpeed)
 			v_speed.x = delta*gameSpeed;
 	}
-	else /// Plynne hamowanie
+	else /// Plynne hamowanie, trzeba to zast¹piæ tarciem!
 	{
 		if (v_speed.x < 0)
 		{
@@ -55,19 +55,6 @@ void Player::horizontalMov(Game * pGame)
 				v_speed.x = 0;
 		}
 	}
-	/// Horizontal collisions with window
-	if (v_speed.x + getPosition().x < 0 + radius)
-	{
-		v_speed.x = -v_speed.x * bounacy;
-		if (abs(v_speed.x) < abs(delta))
-			setPosition(0 + radius, getPosition().y);
-	}
-	else if (v_speed.x + getPosition().x > pGame -> videoX - radius)
-	{
-		v_speed.x = -v_speed.x * bounacy;
-		if (abs(v_speed.x) < abs(delta))
-			setPosition(pGame->videoX - radius, getPosition().y);
-	}
 
 	move(v_speed.x, 0);
 	rotate(v_speed.x);
@@ -78,31 +65,50 @@ void Player::horizontalMov(Game * pGame)
 void Player::verticalMov(Game * pGame)
 {
 	float delta = pGame->delta;
-	float gravity = gravityAcc(delta, pGame->gravity);
-	/// Calculating vertical movement vector: jump
-	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Space) && canJump == true) /// zamien nazwe na onGround lub inAir
+	float acc = delta * v_acceleration.x;
+	float gameSpeed = pGame->gameSpeed; /// Maximum speed
+										/// Calculating vertical movement vector: jump
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 	{
-		v_speed.y = jumpHeight;
-		canJump = false;
+		if (v_speed.y > 0)
+			v_speed.y -= acc * 3; /// Changing direction will be faster
+		else
+			v_speed.y -= acc;
+
+		if (v_speed.y < -delta*gameSpeed)
+			v_speed.y = -delta*gameSpeed;
 	}
-	else if (canJump == false)
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 	{
-		v_speed.y += gravity;
-		/// Detect collision with ground
-		if (getPosition().y + v_speed.y >= (pGame -> videoY) - radius)
+		if (v_speed.y < 0)
+			v_speed.y += acc * 3; /// Changing direction will be faster
+		else
+			v_speed.y += acc;
+
+		if (v_speed.y > delta*gameSpeed)
+			v_speed.y = delta*gameSpeed;
+	}
+	else /// Plynne hamowanie, trzeba to zast¹piæ tarciem!
+	{
+		if (v_speed.y < 0)
 		{
-			v_speed.y = -v_speed.y * bounacy;
-			if (abs(v_speed.y) < abs(delta))
-			{
+			v_speed.y += acc;
+			if (v_speed.y > 0)
 				v_speed.y = 0;
-				setPosition(getPosition().x, (pGame -> videoY) - radius);
-				canJump = true;
-			}
+		}
+		else if (v_speed.y > 0)
+		{
+			v_speed.y -= acc;
+			if (v_speed.y < 0)
+				v_speed.y = 0;
 		}
 	}
+
+
 	move(0, v_speed.y);
 
-	y = getPosition().x;
+	y = getPosition().y;
 }
 
 void Player::onCollision(sf::Vector2f v_interPoint)
